@@ -1,0 +1,67 @@
+{% extends "encabezado.html" %}
+
+{% block contenido %}
+<h1 class="mt-5">Selección de Período de Trabajo (Año)</h1>
+<p class="lead">Por favor, selecciona o crea el **Año** de registro para continuar a la gestión de meses.</p>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Ingresar Año Nuevo
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('seleccion_anio') }}">
+                    <div class="mb-3">
+                        <label for="anio_seleccionado" class="form-label">Año de Trabajo:</label>
+                        <input type="number" id="anio_seleccionado" name="anio_seleccionado" class="form-control" placeholder="Ej: 2027" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        Crear Año Nuevo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                Años Registrados
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for tabla in tablas %}
+                    {% set es_activo = (tabla.anio == session.get('tabla_actual')) %}
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Año: {{ tabla.anio }}</strong>
+                            <br>
+                            <small class="text-muted">Responsable: {{ tabla.responsable }} / {{ tabla.municipio }}</small>
+                            {% if es_activo %}<small class="text-danger fw-bold ms-2">(ACTIVO)</small>{% endif %}
+                        </div>
+                        
+                        <div class="btn-group" role="group">
+                            
+                            <a href="{{ url_for('gestion_mes', anio=tabla.anio) }}" 
+                                class="btn btn-sm {% if es_activo %}btn-primary{% else %}btn-success{% endif %} me-2">
+                                Entrar a Meses
+                            </a>
+                            
+                            <form method="POST" action="{{ url_for('eliminar_anio_completo', anio=tabla.anio) }}" class="d-inline"
+                                  onsubmit="return confirm('ADVERTENCIA: ¿Estás SEGURO de enviar TODO el año {{ tabla.anio }} a la papelera? Esto borrará todos sus meses y registros.');">
+                                <button type="submit" class="btn btn-sm btn-danger" 
+                                    {% if es_activo %}disabled title="No puedes eliminar el año activo"{% endif %}>
+                                    Eliminar Año
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">Aún no hay años registrados. Crea uno arriba.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

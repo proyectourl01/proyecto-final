@@ -1,0 +1,119 @@
+{% extends "encabezado.html" %}
+
+{% block contenido %}
+
+<div class="d-flex align-items-center mt-3 mb-4">
+    <img src="{{ url_for('static', filename='img/logo_minsalud.png') }}" 
+         alt="Logo Ministerio de Salud Pública" 
+         style="width: 80px; margin-right: 20px;">
+    <div>
+        <h1 class="mb-0">DIRECCIÓN DE ÁREA DE SALUD DE ALTA VERAPAZ</h1>
+        <h4 class="mb-0">Listado de susceptibles de <span class="fw-bold">{{ mes }} {{ anio }}</span></h4>
+    </div>
+</div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<div class="card mb-3 p-3 bg-white shadow-sm d-flex flex-row align-items-center justify-content-between border-success">
+    <div class="d-flex align-items-center">
+        <h5 class="mb-0 me-3">Cambiar Mes Activo:</h5>
+        <form method="POST" action="{{ url_for('gestion_mes', anio=anio) }}" class="d-flex">
+            <select name="mes_seleccionado" class="form-select me-2" onchange="this.form.submit()">
+                {% for mes_disp in meses_disponibles %}
+                    <option value="{{ mes_disp }}" {% if mes_disp == mes %}selected{% endif %}>{{ mes_disp }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <a href="{{ url_for('editar_metadatos') }}" class="btn btn-sm btn-outline-secondary">Editar Metadatos del Período</a>
+</div>
+<div class="card mb-4 bg-light shadow-sm p-3 border-info">
+    <div class="row">
+        <div class="col-md-4"><strong>RESPONSABLE:</strong> {{ metadatos.responsable if metadatos else 'N/A' }}</div>
+        <div class="col-md-4"><strong>MUNICIPIO:</strong> {{ metadatos.municipio if metadatos else 'N/A' }}</div>
+        <div class="col-md-4"><strong>PUESTO DE SALUD:</strong> {{ metadatos.puesto_salud if metadatos else 'N/A' }}</div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center bg-light shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Total de Registros ({{ mes }} {{ anio }})</h5>
+                <p class="fs-2 fw-bold text-primary">{{ total_registros }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center bg-light shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Vacunas Pendientes</h5>
+                <p class="fs-2 fw-bold text-danger">{{ total_pendientes }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('crear') }}" class="btn btn-success btn-lg">
+        + Registrar Nuevo Susceptible
+    </a>
+</div>
+<form method="GET" action="{{ url_for('home') }}" class="mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-9">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por Nombre del Niño o Comunidad..." 
+                   value="{{ request.args.get('q', '') }}">
+        </div>
+        <div class="col-md-3 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary me-2">Buscar</button>
+            {% if request.args.get('q') %}
+                <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Mostrar Todos</a>
+            {% endif %}
+        </div>
+    </div>
+</form>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>No. Orden</th> 
+            <th>Nombre del niño</th>
+            <th>Fecha Nac.</th>
+            <th>Nombre de la madre</th>
+            <th>Comunidad</th>
+            <th>Vacuna pendiente</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for estudiante in est %}
+        <tr>
+            <td>{{ loop.index }}</td> 
+            <td>{{ estudiante.nombre_nino }}</td>
+            <td>{{ estudiante.fecha_nacimiento }}</td>
+            <td>{{ estudiante.nombre_madre }}</td>
+            <td>{{ estudiante.comunidad }}</td>
+            <td class="text-danger fw-bold">{{ estudiante.vacuna_pendiente }}</td>
+            <td>
+                <a href="{{ url_for('detalles', id=estudiante.id) }}" class="btn btn-sm btn-info">Ver</a>
+                <a href="{{ url_for('editar', id=estudiante.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                <a href="{{ url_for('eliminar', id=estudiante.id) }}" 
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('¿Estás seguro de ELIMINAR el registro de {{ estudiante.nombre_nino }}?');">
+                    Eliminar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

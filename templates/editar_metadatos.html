@@ -1,0 +1,43 @@
+{% extends "encabezado.html" %}
+
+{% block contenido %}
+<h1 class="mt-3">Editar Metadatos</h1>
+<h4 class="mb-4 text-primary">Período Activo: {{ anio }} - {{ mes }}</h4>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<form action="{{ url_for('editar_metadatos') }}" method="post">
+    
+    <div class="mb-3">
+        <label class="form-label">Responsable del Período:</label>
+        <input type="text" name="responsable" 
+               value="{{ metadatos.responsable if metadatos else 'PENDIENTE' }}" 
+               class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Municipio:</label>
+        <input type="text" name="municipio" 
+               value="{{ metadatos.municipio if metadatos else 'PENDIENTE' }}" 
+               class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Puesto de Salud:</label>
+        <input type="text" name="puesto_salud" 
+               value="{{ metadatos.puesto_salud if metadatos else 'PENDIENTE' }}" 
+               class="form-control" required>
+    </div>
+    
+    <button type="submit" class="btn btn-success">Guardar Metadatos</button>
+    <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

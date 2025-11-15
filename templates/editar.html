@@ -1,0 +1,62 @@
+{% extends "encabezado.html" %}
+
+{% block contenido %}
+<h1 class="mt-3">Editar Registro de Susceptible (ID: {{ est.id }})</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+<form action="{{ url_for('editar', id=est.id) }}" method="post">
+    
+    <div class="mb-3">
+        <label class="form-label">Nombre del niño:</label>  
+        <input type="text" name="nombre_nino" value="{{ est.nombre_nino }}" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Fecha de nacimiento:</label>
+        <input type="date" name="fecha_nacimiento" value="{{ est.fecha_nacimiento }}" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Nombre de la madre:</label>
+        <input type="text" name="nombre_madre" value="{{ est.nombre_madre }}" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Comunidad:</label>
+        <input type="text" name="comunidad" value="{{ est.comunidad }}" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Vacuna pendiente:</label>
+        
+        <input type="text" 
+               name="vacuna_pendiente" 
+               id="vacunaPendienteInput"
+               value="{{ est.vacuna_pendiente }}" 
+               placeholder="Escriba la vacuna, o seleccione una opción" 
+               class="form-control" 
+               list="opcionesVacuna">
+        
+        <datalist id="opcionesVacuna">
+            <option value="NINGUNA">
+            <option value="Rotavirus - 1ra Dosis">
+            <option value="Neumococo Conjugada - 1ra Dosis">
+            <option value="Hepatitis A">
+            <option value="SRP - 2da Dosis">
+            <option value="Pentavalente">
+            <option value="DPT">
+        </datalist>
+
+    </div>
+
+    <input type="submit" value="Actualizar Registro" class="btn btn-warning">
+</form>
+{% endblock %}

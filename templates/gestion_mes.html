@@ -1,0 +1,98 @@
+{% extends "encabezado.html" %}
+
+{% block contenido %}
+<h1 class="mt-5">Gestión de Meses para el Año: <span class="text-primary">{{ anio }}</span></h1>
+<p class="lead">Selecciona un mes existente para comenzar a trabajar o duplica uno para iniciar un nuevo registro.</p>
+
+<div class="row">
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                Meses Registrados ({{ anio }})
+            </div>
+            <ul class="list-group list-group-flush">
+                {% set current_mes = session.get('mes_activo') %}
+                
+                {% for info in meses_info_ordenada %}
+                    {% set mes = info.mes %}
+                    {% set periodo_activo = mes == current_mes %}
+                    
+                    {% set es_copia = '(' in mes and ')' in mes %}
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="{% if periodo_activo %}fw-bold text-success{% endif %}">
+                            {{ mes }}
+                            {% if periodo_activo %}<small>(ACTIVO)</small>{% endif %}
+                        </span>
+                        
+                        <div class="btn-group" role="group">
+                            
+                            {% if periodo_activo %}
+                                <a href="{{ url_for('home') }}" class="btn btn-sm btn-primary me-2">Entrar</a>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('gestion_mes', anio=anio) }}" class="d-inline me-2">
+                                    <input type="hidden" name="mes_seleccionado" value="{{ mes }}">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        Seleccionar
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if es_copia %}
+                                <form method="POST" action="{{ url_for('eliminar_periodo', anio=anio, mes=mes) }}" class="d-inline"
+                                      onsubmit="return confirm('ADVERTENCIA: ¿Estás SEGURO de eliminar PERMANENTEMENTE la copia {{ mes }}? Se borrará el mes y todos sus registros.');">
+                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                        {% if periodo_activo %}disabled title="No se puede eliminar el mes activo"{% endif %}>
+                                        Eliminar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('vaciar_mes', anio=anio, mes=mes) }}" class="d-inline"
+                                      onsubmit="return confirm('¿Estás seguro de VACIAR TODOS los registros de {{ mes }} ({{ anio }})? El mes y metadatos se mantendrán.');">
+                                    <button type="submit" class="btn btn-sm btn-warning"
+                                        {% if periodo_activo %}disabled title="No se puede vaciar el mes activo"{% endif %}>
+                                        Vaciar Registros
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                Crear Mes Duplicado
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('gestion_mes', anio=anio) }}">
+                    
+                    <div class="mb-3">
+                        <label for="mes_a_duplicar" class="form-label">Mes a Copiar (Metadatos):</label>
+                        <select name="mes_a_duplicar" id="mes_a_duplicar" class="form-select" required>
+                            <option value="" disabled selected>Seleccione mes de origen</option>
+                            {% for info in meses_info_ordenada %}
+                                <option value="{{ info.mes }}">
+                                    {{ info.mes }} (Resp: {{ info.responsable }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Se copiarán Responsable, Municipio y Puesto de Salud de este mes.</small>
+                    </div>
+
+                    <input type="hidden" name="mes_nuevo" value="DUPLICAR_ACCION_SIMPLE"> 
+                    <button type="submit" class="btn btn-info w-100">Crear Mes Duplicado y Activar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-4 text-center">
+    <a href="{{ url_for('seleccion_anio') }}" class="btn btn-secondary">← Volver a Selección de Año</a>
+</div>
+{% endblock %}
